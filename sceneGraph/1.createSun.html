@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>태양계</title>
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%;
+        }
+        #c {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+    </style>
+    <script type="module">
+        import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r122/build/three.module.js';
+
+        function main(){
+            const canvas = document.querySelector('#c');
+            const renderer = new THREE.WebGLRenderer({canvas});
+            const scene = new THREE.Scene();
+
+            // 회전값을 업데이트할 객체들
+            const objects = [];
+
+            // 하나의 geometry로 모든 태양, 지구, 달을 생성
+            const radius = 1;
+            const widthSegments = 6; // 가로 6등분
+            const heightSegments = 6; // 세로 6등분
+            const sphereGeometry = new THREE.SphereBufferGeometry(
+                radius, widthSegments, heightSegments
+            );
+
+            const sunMaterial = new THREE.MeshPhongMaterial({emissive: 0xFFFF00});
+            const sunMesh = new THREE.Mesh(sphereGeometry, sunMaterial);
+            sunMesh.scale.set(5, 5, 5);  // 태양의 크기를 키움
+            scene.add(sunMesh);
+            objects.push(sunMesh);
+
+            {
+                const color = 0xFFFFFF;
+                const intensity = 3;
+                const light = new THREE.PointLight(color, intensity);
+                scene.add(light);
+            }
+
+            const fov = 40;
+            const aspect = 2;  // the canvas default
+            const near = 0.1;
+            const far = 1000;
+            const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+            camera.position.set(0, 50, 0);
+            camera.up.set(0, 0, 1);
+            camera.lookAt(0, 0, 0);
+
+
+            function resizeRendererToDisplaySize(renderer) {
+                const canvas = renderer.domElement;
+                const width = canvas.clientWidth;
+                const height = canvas.clientHeight;
+                const needResize = canvas.width !== width || canvas.height !== height;
+                if (needResize) {
+                    renderer.setSize(width, height, false);
+                }
+                return needResize;
+            }
+
+            function render(time) {
+                time *= 0.001;
+
+                if (resizeRendererToDisplaySize(renderer)) {
+                    const canvas = renderer.domElement;
+                    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                    camera.updateProjectionMatrix();
+                }
+
+                objects.forEach((obj) => {
+                    obj.rotation.y = time;
+                });
+
+                renderer.render(scene, camera);
+
+                requestAnimationFrame(render);
+            }
+
+            requestAnimationFrame(render);
+        }
+
+        main();
+    </script>
+</head>
+<body>
+<canvas id="c"></canvas>
+</body>
+</html>
